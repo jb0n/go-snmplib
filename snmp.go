@@ -266,7 +266,7 @@ func (w SNMP) GetMultiple(oids []Oid) (map[string]interface{}, error) {
 
 	result := make(map[string]interface{})
 	for _, v := range respVarbinds[1:] { // First element is just a sequence
-		vbi := v.([]interface{})[1]
+		vbi, _ := v.([]interface{})
 		if len(vbi) < 3 {
 			continue
 		}
