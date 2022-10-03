@@ -67,6 +67,10 @@ const (
 	SnmpMD5    string = "MD5"
 )
 
+var (
+	ErrSNMPParseError = errors.New("error parsing SNMP buffer")
+)
+
 func passwordToKey(password string, engineID string, hashAlg string) string {
 	h := sha1.New()
 	if hashAlg == "MD5" {
@@ -223,9 +227,11 @@ func (w SNMP) Get(oid Oid) (interface{}, error) {
 	// Fetch the varbinds out of the packet.
 	respPacket := decodedResponse[3].([]interface{})
 	varbinds := respPacket[4].([]interface{})
-	result := varbinds[1].([]interface{})[2]
-
-	return result, nil
+	vbi, _ := varbinds[1].([]interface{})
+	if len(vbi) < 3 {
+		return nil, ErrSNMPParseError
+	}
+	return vbi[2], nil
 }
 
 // GetMultiple issues a single GET SNMP request requesting multiple values
@@ -260,8 +266,12 @@ func (w SNMP) GetMultiple(oids []Oid) (map[string]interface{}, error) {
 
 	result := make(map[string]interface{})
 	for _, v := range respVarbinds[1:] { // First element is just a sequence
-		oid := v.([]interface{})[1].(Oid).String()
-		value := v.([]interface{})[2]
+		vbi, _ := v.([]interface{})[1]
+		if len(vbi) < 3 {
+			continue
+		}
+		oid := vbi[1].(Oid).String()
+		value := vbi[2]
 		result[oid] = value
 	}
 

@@ -333,9 +333,9 @@ func DecodeSequence(toparse []byte) ([]interface{}, error) {
 			}
 			result = append(result, pdu)
 		case noSuchObject:
-			return nil, fmt.Errorf("No Such Object")
+			// return nil, fmt.Errorf("No Such Object")
 		case noSuchInstance:
-			return nil, fmt.Errorf("No Such Instance currently exists at this OID")
+			// return nil, fmt.Errorf("No Such Instance currently exists at this OID")
 		default:
 			return nil, fmt.Errorf("did not understand type %v", berType)
 		}
